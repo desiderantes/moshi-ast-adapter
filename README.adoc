@@ -1,0 +1,54 @@
+= Moshi Adapter: AST
+
+This library offers an adapter that exposes the JSON document as an abstract syntax tree (AST).
+This is useful when you need to inspect the JSON document before converting it to a Java or Kotlin object, or when you
+need to process a document that doesn't map well to a Java or Kotlin object, or does not have a schema that can be
+expressed by the type system. As a little treat, Integer and Decimal values are differentiated in the AST, to help with
+precision issues.
+
+The AST adapter does not throw on an invalid document token, but instead returns a `+JNothing+` value.
+Keep in mind that Moshi itself does throw on invalid documents unless you enable leniency, and lenient parsers will
+produce strings on most invalid inputs, so `+JNothing+` is a value that is not normally expected in normal operation,
+and can instead be used when constructing an AST as a dummy to fill in the gaps, since the value is ignored on
+serialization.
+
+[,kotlin]
+----
+import com.desiderantes.moshi.ast.*
+import com.squareup.moshi.Moshi
+
+val adapter = AstAdapter()
+val json = """
+  {
+    "name": "Jesse",
+    "age": 35,
+    "isDeveloper": true,
+    "height": 1.85,
+    "address": {
+      "street": "Unknown",
+      "city": "San Francisco"
+    },
+    "children": ["Julia", "Sam"]
+  }
+"""
+val value = adapter.fromJson(json)
+assert(value is JObject)
+recursiveStuff(value)
+  ...
+// Inspect the AST
+fun recursiveStuff(obj: JValue<*>) {
+  when (obj) {
+    is JArray -> obj.value.forEach { recursiveStuff(it) }
+    is JObject -> obj.value.forEach {
+      print("Field: ${it.name}")
+      recursiveStuff(it.value)
+    }
+    is JString -> println("String: ${obj.value.value}")
+    is JNumber -> println("Number: ${obj.value}")
+    is JBoolean -> println("Boolean: ${obj.value}")
+    is JNull -> println("Null")
+    is JNothing -> error("Oh no! Invalid token")
+  }
+}
+
+----

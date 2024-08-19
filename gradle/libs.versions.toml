@@ -1,0 +1,13 @@
+[versions]
+java = "17"
+kotlin = "2.0.0"
+moshi = "1.15.1"
+junit-jupiter = "5.10.2"
+junit-platform = "1.10.2"
+
+[libraries]
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit-platform" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+
+moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
